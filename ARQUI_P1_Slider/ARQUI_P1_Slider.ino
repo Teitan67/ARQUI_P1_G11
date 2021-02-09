@@ -1,19 +1,79 @@
-#include <MatrizLed.h>
-int data = 4;
-int load = 3;
-int clk = 2;
-int matrix = 2;    //Numero de displays a usar  
-MatrizLed pantalla;
+//Importaciones
+#include <MD_Parola.h>
+#include <MD_MAX72xx.h>
+#include <SPI.h>
+
+//Codigo de control de matriz
+//Configuracion de las matrices
+#define HARDWARE_TYPE MD_MAX72XX::ICSTATION_HW
+#define MAX_DEVICES 2
+#define CLK_PIN   13
+#define DATA_PIN  11
+#define CS_PIN    10
+int direc_pin =8;
+
+MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
+
+//Parametros Scrolling
+
+uint8_t scrollSpeed = 100;    // velocidad
+textEffect_t scrollEffect = PA_SCROLL_LEFT;
+textPosition_t scrollAlign = PA_LEFT;
+uint16_t scrollPause = 1000; // en milisegundos
+
+// Global message buffers shared by Serial and Scrolling functions
+#define  BUF_SIZE  75
+char curMessage[BUF_SIZE] = { "" };
+char newMessage[BUF_SIZE] = { "TP1 - GRUPO 11 - SECCION B" };
+bool newMessageAvailable = true;
+
+
+void readSerial(void)
+{
+  static char *cp = newMessage;
+
+  while (Serial.available()){
+    *cp = (char)Serial.read();
+    if ((*cp == '\n') || (cp - newMessage >= BUF_SIZE-2)){
+      *cp = '\0'; // end the string
+      
+      cp = newMessage;
+      newMessageAvailable = true;
+    }
+    else  // move char pointer to next position
+      cp++;
+  }
+}
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Iniciando aplicacion con normalidad...\n");
-  pantalla.begin(data, clk, load, matrix); // dataPin, clkPin, csPin, numero de matrices de 8x8
-  pantalla.rotar(true);
+
+  P.begin();
+  P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+  pinMode(direc_pin,INPUT);
 }
 
 void loop() {
-  pantalla.borrar();
-  pantalla.escribirFraseScroll("TP1 - GRUPO 11 - SECCION B",5); // Texto, posicion en la pantalla
+  if (digitalRead(direc_pin)==1){
+    if(scrollEffect==PA_SCROLL_RIGHT){
+      scrollEffect = PA_SCROLL_LEFT; 
+      scrollAlign = PA_LEFT;
+    }else{
+      scrollEffect = PA_SCROLL_RIGHT;
+      scrollAlign = PA_RIGHT;
+    }
+    P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+  }
+  if (P.displayAnimate())
+  {
+    if (newMessageAvailable)
+    {
+      strcpy(curMessage, newMessage);
+      newMessageAvailable = false;
+    }
+    P.displayReset();
+  }
+  readSerial();
 
 }
