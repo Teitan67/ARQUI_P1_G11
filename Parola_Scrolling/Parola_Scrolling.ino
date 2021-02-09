@@ -1,3 +1,6 @@
+#include <Adafruit_CircuitPlayground.h>
+#include <Adafruit_Circuit_Playground.h>
+
 // Use the Parola library to scroll text on the display
 //
 // Demonstrates the use of the scrolling function to display text received

@@ -19,6 +19,7 @@ MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 uint8_t scrollSpeed = 100;    // velocidad
 textEffect_t scrollEffect = PA_SCROLL_LEFT;
 textPosition_t scrollAlign = PA_LEFT;
+
 uint16_t scrollPause = 1000; // en milisegundos
 
 // Global message buffers shared by Serial and Scrolling functions
@@ -30,6 +31,7 @@ bool newMessageAvailable = true;
 
 void readSerial(void)
 {
+  
   static char *cp = newMessage;
 
   while (Serial.available()){
@@ -60,8 +62,11 @@ void loop() {
       scrollEffect = PA_SCROLL_LEFT; 
       scrollAlign = PA_LEFT;
     }else{
+    
+       P.displayClear();// limpia las matrices y se reinicia la animación
       scrollEffect = PA_SCROLL_RIGHT;
       scrollAlign = PA_RIGHT;
+      
     }
     P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
   }
