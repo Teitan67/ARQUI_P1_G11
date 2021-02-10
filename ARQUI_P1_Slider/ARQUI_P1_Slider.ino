@@ -11,12 +11,13 @@
 #define DATA_PIN  11
 #define CS_PIN    10
 int direc_pin =8;
+int vel_pin=9;
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
 //Parametros Scrolling
 
-uint8_t scrollSpeed = 100;    // velocidad
+uint8_t scrollSpeed = 30;    // velocidad
 textEffect_t scrollEffect = PA_SCROLL_LEFT;
 textPosition_t scrollAlign = PA_LEFT;
 
@@ -54,21 +55,33 @@ void setup() {
   P.begin();
   P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
   pinMode(direc_pin,INPUT);
+  pinMode(vel_pin,INPUT);
 }
 
 void loop() {
   if (digitalRead(direc_pin)==1){
+    Serial.println("Cambio de direccion!!");
     if(scrollEffect==PA_SCROLL_RIGHT){
       scrollEffect = PA_SCROLL_LEFT; 
       scrollAlign = PA_LEFT;
     }else{
-    
-       P.displayClear();// limpia las matrices y se reinicia la animación
       scrollEffect = PA_SCROLL_RIGHT;
       scrollAlign = PA_RIGHT;
       
     }
+    P.displayClear();// limpia las matrices y se reinicia la animación
     P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+    delay(500);
+  }
+  if (digitalRead(vel_pin)==1){
+    Serial.println("Cambio de Velocidad!!");
+    if(scrollSpeed==30){
+      scrollSpeed=100;
+    }else{
+      scrollSpeed=30;
+    }
+    P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+    delay(500);
   }
   if (P.displayAnimate())
   {
