@@ -13,6 +13,7 @@
 int direc_pin =8;
 int vel_pin=9;
 int msm_pin=7;
+int indice=0;
 
 MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 
@@ -57,7 +58,7 @@ void cambioVelocidad(){
     }else{
       scrollSpeed=30;
     }
-    P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
+     P.setSpeed(scrollSpeed) ;
     delay(500);
   }
 
@@ -103,6 +104,7 @@ void loop() {
 
 }
 void modoDisplay(){
+  cambioVelocidad();
     if(digitalRead(msm_pin)==0&&modoAnterior==1){
         Serial.println("Modo scrolling");
         modoAnterior=0;
@@ -110,7 +112,7 @@ void modoDisplay(){
         P.displayText(curMessage, scrollAlign, scrollSpeed, scrollPause, scrollEffect, scrollEffect);
     }
     if(digitalRead(msm_pin)==0&&modoAnterior==0){
-        cambioVelocidad();
+        
         cambioDireccion();
         if (P.displayAnimate())
         {
@@ -129,8 +131,17 @@ void modoDisplay(){
       P.displayClear();
     }
     if(digitalRead(msm_pin)==1&&modoAnterior==1){
+      P.displayClear();
       P.setTextEffect(PA_NO_EFFECT ,PA_NO_EFFECT);
-      P.setTextBuffer("prueba");
+      P.setTextAlignment(PA_CENTER);
+      char letra[5]={' ',' ',newMessage[indice],' ',' '};
+      P.setTextBuffer(letra);
       P.displayAnimate();
+      indice++;
+      delay(scrollSpeed*5);
+      P.displayReset();
+      if (indice>28){
+        indice=0;
+      }
     }
 }
